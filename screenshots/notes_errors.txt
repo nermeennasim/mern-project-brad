@@ -1,0 +1,350 @@
+notes:
+
+nodemon always help runing up server whenver you control+ save  all changes go on server
+
+=== package.json===
+{
+  "name": "mern-project-brad",
+  "version": "1.0.0",
+  "description": "Goal setter for learning purpose",
+  "main": "server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "server": "nodemon backend/server.js"
+  },
+  "author": "Nermeen Nasim",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "mongoose": "^6.3.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16",
+    "simple-git": "^3.7.1"
+  }
+}
+***********************************************************************************************
+errors:
+port problem:
+solved by moving .env files to ROOT FOlder mern folder
+server port was not printing out
+nodemon command to always keep server started
+then http://localhost:2000/api/goals
+
+GET request on pOST MAN
+
+post man desktop agent signed in, andusing token
+
+we removed ssl off so NO HTTP with S
+only http
+
+its working
+
+
+=======================server.js (main entry point) , run by npm run start / npm run server====================
+
+
+//declare all dependencies for backend/API
+
+const express = require('express')
+require('dotenv').config();
+const port = process.env.PORT|| 5000;
+
+const app = express();
+
+//set api route to post man service
+app.use('/api/goals',(require('./routes/goalRoutes')));
+
+//starting server using app.listen
+    app.listen(port,() =>
+     {
+         console.log('Server has started on :'+ port);
+        }
+    );
+
+
+
+
+================
+server.js
+//declare all dependencies for backend/API
+
+const express = require('express')
+require('dotenv').config();
+const port = process.env.PORT|| 5000;
+
+const app = express();
+
+//set api route to post man service
+app.get('/api/goals',(req,res)=> {
+
+    res.json({message: 'Get Goals'});
+
+//or we can set res.status(200).json({message,'Get Goals'});
+})
+
+//starting server using app.listen
+    app.listen(port,() =>
+     {
+         console.log('Server has started on :'+ port);
+        }
+    );
+
+=====================
+on post man desktop client
+
+we DO GET request
+and its like this
+
+{
+    "message": "Get Goals"
+}
+
+succesfully running on server ..
+
+//////////
+
+next we dont want to keep our routes like api/goals etc in SERVER.JS file, so what do we do we create route seperate file and folder.
+
+inside goalsRoute.js file
+
+//we wil restart server to see changes in POST MAN
+
+router.get('/',(req,res) => {
+    res.status(200).json({message:'Get Goals'})
+});
+
+router.post('/',(req,res) => {
+    res.status(200).json({message:'Set Goals'})
+});
+
+router.put('/:id',(req,res) => {
+    res.status(200).json({message: `Update goals ${req.params.id}`})
+});
+
+router.delete('/:id',(req,res) => {
+    res.status(200).json({message: `Delete goals ${req.params.id}`})
+});
+
+
+
+===========================================
+
+so to implement our own functionality here in route folder, ti wont be a nice practice
+so what we are gonna do
+is
+create Another folder CONTROLLER. and put all these functionality there and call from here
+
+route.js call all functions of controller and put body in there
+from controller/goalsController.js we set up functions
+
+#################### this is route.js#######
+const express= require('express');
+const { uptime } = require('os');
+const router = express.Router();
+const {getGoals, setGoals,UpdateGoal, deleteGoal} = require('../controllers/goalsController')
+
+
+router.get('/', getGoals)
+
+router.post('/',setGoals)
+
+router.put('/:id',UpdateGoal)
+
+router.delete('/:id',deleteGoal)
+
+
+module.exports = router;
+
+===========================this is ../controller/ goalController.js===============
+
+
+//@desc          Get gOals
+//@access       Private
+//@route        GET /api/goals
+
+const getGoals= (req,res )=> {
+
+    res.status(200).json({message : 'Get Goals'
+    })
+}
+
+//@desc     Set Goals
+//@access   Private
+//@route    POST /api/goals
+
+const setGoals= (req,res) => {
+    res.status(200).json({message:'Set Goals'})
+
+}
+
+//@desc     Update Goal
+//@access   Private
+//@route    PUT /api/goals/:id
+
+const UpdateGoal= (req,res )=> {
+
+    res.status(200).json({message: `Update goals ${req.params.id}`})
+}
+
+//@desc     Delete Goal
+//@access   Private
+//@route    Delete /api/goals/:id
+
+const deleteGoal= (req,res )=> {
+
+    res.status(200).json({message: `Delete goals ${req.params.id}`})
+}
+module.exports = {
+
+    getGoals,
+    setGoals,
+    UpdateGoal,
+    deleteGoal
+}
+
+
+=====================
+before connecting to database we are goin to handle errors
+server.js file: we added these lines
+
+app.use(express.json());
+app.use(express.urlencoded({extended: false}))
+
+
+======inside goal controller we added this
+
+const setGoals= (req,res) => {
+
+    //sending text form api
+    console.log(req.body)
+    res.status(200).json({message:'Set Goals'})
+
+}
+
+
+Press send button on POST method POST MAN API:
+=========================================
+
+LOg result:--===
+
+nodemon] restarting due to changes...
+[nodemon] starting `node backend/server.js`
+Server has started on :2000
+[nodemon] restarting due to changes...
+[nodemon] starting `node backend/server.js`
+Server has started on :2000
+[nodemon] restarting due to changes...
+[nodemon] starting `node backend/server.js`
+Server has started on :2000
+[Object: null prototype] { text: 'My First Goal' }
+
+===
+
+if we send Throw new Error() inse set goals method it wil give us HTML code inside POSTMAN
+
+so what we do is create middle ware to add error exception function 
+//we make serperate function for handling exception that is MIDDLEWARE/goalsmiddleware.js
+
+errors = 400 client side erros
+200 ok
+500 are Server side errors
+
+problem in getting stack trace:
+1) problem in .env file
+2) restart nodemon and save file again
+3) post man send again with unchecked TEXT FIELD
+4) error code
+
+***ITs working now***
+null value when production
+stack trace when development in side .env file
+
+===============
+
+Next step 
+
+before we connect mongo db, we use mongoose
+
+async to all methods like setGoals
+getgoals etc
+
+//for async we have to use try catch block always, but here we are using error handling class
+so we are goin to install
+npm i express-async-handler in new terminal
+
+next step
+=================
+we are goin to require a variable in controller class which is like
+const asyncHandler = require('express-async-handler')
+
+then we are goin to do is:
+wrap all functions around asyncHandler ( )
+
+const UpdateGoal= asyncHandler(async (req,res )=> {
+
+    res.status(200).json({message: `Update goals ${req.params.id}`})
+})
+
+==================
+created MONGO db cluster / and database mernapp/goals table
+
+copy connection string in .env file
+
+create new folder -> config/db.js
+mongodb+srv://admin:admin@cluster0.fb7wc.mongodb.net/mernapp?retryWrites=true&w=majority
+
+db.js==>
+mongoose require('mongoose')
+
+colors require in server.js
+
+function connectDB inside db.js
+
+const mongoose = require('mongoose')
+
+//function for db connection
+const connectDb = async() => {
+
+    try {
+        const conn = await mongoose.connect(process.env.MONGO_URI)
+        console.log(`MongoDB connected : ${ conn.connection.host}`.cyan.underline)
+//we wil high light the connection succesful and also the host it returns from DB, cyan and underline
+
+    } catch (error) {
+        console.log(error)
+       process.exit(1)
+    }
+}
+
+==in server .js we wil declare and call this function
+connectDB = require('./config/db')
+//simple call on first server.js
+connectDB();
+
+ctrl + s = > saw log MONGO db connected
+=========================
+
+next step we are going ot create Models for our system
+i.e data  or define whatever in  your applicaiotn required .fields etc
+what ever you need to store
+
+for GOals -> just a text
+for example for blog post -> pic, name,commencts etc
+
+
+Models= text, timestamp, or may be id
+
+//==================next 
+
+we want to send and retrieve object Goal from db and to db 
+
+Inside GetGoals function we are retrieving
+const goals = Goals.find()
+res.status().json(goals) object passed as parameter instead of passing hard coded "Get goals"
+
+problem Goal.find is not working, so im trying goal.json()
+
+its returning empty

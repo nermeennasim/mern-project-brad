@@ -1,0 +1,23 @@
+{
+  "name": "mern-project-brad",
+  "version": "1.0.0",
+  "description": "Goal setter for learning purpose",
+  "main": "server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "server": "nodemon backend/server.js"
+  },
+  "author": "Nermeen Nasim",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "express-async-handler": "^1.2.0",
+    "mongoose": "^6.3.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16",
+    "simple-git": "^3.7.1"
+  }
+}
